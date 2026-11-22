@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/livro.dart';
 import '../services/data_access_object.dart';
 import 'cadastro_livro.dart';
@@ -73,12 +74,25 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
 
     showModalBottomSheet(
       context: context,
+      showDragHandle: true,
       builder: (ctx) {
         return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
           itemCount: opcoes.length,
           itemBuilder: (ctx, index) {
             final item = opcoes[index];
             return ListTile(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                child: Icon(
+                  tipo == 'genero'
+                      ? Icons.category_outlined
+                      : Icons.auto_stories_outlined,
+                ),
+              ),
               title: Text(item),
               onTap: () {
                 Navigator.pop(ctx);
@@ -99,8 +113,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Meu Diário de Leitura', style: TextStyle(fontSize: 18)),
+        title: const Text('Diário de Leitura'),
         actions: [
           IconButton(
             icon: const Icon(Icons.collections_bookmark_outlined),
@@ -114,7 +127,8 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Atualizar biblioteca',
             onPressed: () {
               setState(() {
                 _filtroAtual = 'todos';
@@ -127,15 +141,73 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
       ),
       body: Column(
         children: [
-          // Barra de filtros com chips compactos
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Sua biblioteca',
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              color: const Color(0xFF263129),
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.7,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Uma estante feita de histórias suas.',
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: const Color(0xFF7C857B)),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 9,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE9EFE9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.menu_book_rounded,
+                        color: Color(0xFF48634F),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${_livros.length}',
+                        style: const TextStyle(
+                          color: Color(0xFF48634F),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Row(
               children: [
                 FilterChip(
-                  visualDensity: VisualDensity.compact,
-                  label: const Text('Todos', style: TextStyle(fontSize: 12)),
+                  showCheckmark: false,
+                  label: const Text('Todos'),
                   selected: _filtroAtual == 'todos',
                   onSelected: (selected) {
                     setState(() {
@@ -147,24 +219,22 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                 ),
                 const SizedBox(width: 6),
                 FilterChip(
-                  visualDensity: VisualDensity.compact,
+                  showCheckmark: false,
                   label: Text(
                     _filtroAtual == 'genero' && _valorFiltro != null
                         ? 'Gênero: $_valorFiltro'
                         : 'Por Gênero',
-                    style: const TextStyle(fontSize: 12),
                   ),
                   selected: _filtroAtual == 'genero',
                   onSelected: (selected) => _abrirSelecaoFiltro('genero'),
                 ),
                 const SizedBox(width: 6),
                 FilterChip(
-                  visualDensity: VisualDensity.compact,
+                  showCheckmark: false,
                   label: Text(
                     _filtroAtual == 'colecao' && _valorFiltro != null
                         ? 'Coleção: $_valorFiltro'
                         : 'Por Coleção',
-                    style: const TextStyle(fontSize: 12),
                   ),
                   selected: _filtroAtual == 'colecao',
                   onSelected: (selected) => _abrirSelecaoFiltro('colecao'),
@@ -179,36 +249,68 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
             child: _carregando
                 ? const Center(child: CircularProgressIndicator())
                 : _livros.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'Nenhum livro registrado.\nToque no + para começar!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE9EFE9),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Icon(
+                            Icons.auto_stories_outlined,
+                            size: 30,
+                            color: Color(0xFF48634F),
+                          ),
                         ),
-                      )
-                    : GridView.builder(
-                        padding: const EdgeInsets.all(8),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3, // 3 colunas para capas menores
-                          childAspectRatio: 0.52, // Altura proporcional ajustada
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
+                        const SizedBox(height: 16),
+                        Text(
+                          'Sua estante está à espera',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Adicione um livro para começar seu diário.',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: const Color(0xFF7C857B)),
+                        ),
+                      ],
+                    ),
+                  )
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final colunas = constraints.maxWidth >= 1100
+                          ? 5
+                          : constraints.maxWidth >= 760
+                          ? 4
+                          : constraints.maxWidth >= 520
+                          ? 3
+                          : 2;
+
+                      return GridView.builder(
+                        padding: const EdgeInsets.all(18),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: colunas,
+                          childAspectRatio: 0.62,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
                         ),
                         itemCount: _livros.length,
                         itemBuilder: (context, index) {
                           final livro = _livros[index];
                           return Card(
-                            elevation: 2,
                             clipBehavior: Clip.antiAlias,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
                             child: InkWell(
                               onTap: () async {
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => DetalhesLivro(livro: livro),
+                                    builder: (context) =>
+                                        DetalhesLivro(livro: livro),
                                   ),
                                 );
                                 _carregarLivros();
@@ -216,56 +318,80 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  // Capa reduzida
                                   Expanded(
                                     child: livro.urlCapa.isNotEmpty
                                         ? Image.network(
                                             livro.urlCapa,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) => Container(
-                                              color: Colors.grey[200],
-                                              child: const Icon(Icons.broken_image, size: 28, color: Colors.grey),
-                                            ),
+                                            errorBuilder: (_, __, ___) =>
+                                                Container(
+                                                  color: const Color(
+                                                    0xFFF0F2EF,
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.auto_stories_outlined,
+                                                    size: 32,
+                                                    color: Color(0xFF9BA49A),
+                                                  ),
+                                                ),
                                           )
                                         : Container(
-                                            color: Colors.grey[200],
-                                            child: const Icon(Icons.book, size: 32, color: Colors.grey),
+                                            color: const Color(0xFFF0F2EF),
+                                            child: const Icon(
+                                              Icons.auto_stories_outlined,
+                                              size: 32,
+                                              color: Color(0xFF9BA49A),
+                                            ),
                                           ),
                                   ),
-                                  // Textos menores
                                   Padding(
-                                    padding: const EdgeInsets.all(6.0),
+                                    padding: const EdgeInsets.fromLTRB(
+                                      12,
+                                      10,
+                                      12,
+                                      12,
+                                    ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           livro.titulo,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                            height: 1.1,
+                                            color: Color(0xFF263129),
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                            height: 1.3,
                                           ),
                                         ),
-                                        const SizedBox(height: 2),
+                                        const SizedBox(height: 4),
                                         Text(
                                           livro.autor,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 9.5,
-                                            color: Colors.grey[700],
+                                          style: const TextStyle(
+                                            color: Color(0xFF7C857B),
+                                            fontSize: 10,
                                           ),
                                         ),
-                                        const SizedBox(height: 2),
+                                        const SizedBox(height: 6),
                                         Row(
                                           children: [
-                                            const Icon(Icons.star, size: 11, color: Colors.amber),
-                                            const SizedBox(width: 2),
+                                            const Icon(
+                                              Icons.star_rounded,
+                                              size: 14,
+                                              color: Color(0xFFD59B42),
+                                            ),
+                                            const SizedBox(width: 3),
                                             Text(
                                               livro.nota.toStringAsFixed(1),
-                                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                                              style: const TextStyle(
+                                                color: Color(0xFF59645A),
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -277,11 +403,13 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                             ),
                           );
                         },
-                      ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.small(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final adicionou = await Navigator.push(
             context,
@@ -291,7 +419,8 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
             _carregarLivros();
           }
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Adicionar livro'),
       ),
     );
   }

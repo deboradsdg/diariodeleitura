@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/livro.dart';
 import '../services/data_access_object.dart';
 import 'detalhes_livro.dart';
@@ -64,81 +65,134 @@ class _ListaColecoesState extends State<ListaColecoes> {
 
     if (chaves.isEmpty) {
       return Center(
-        child: Text(
-          'Nenhum livro com $tipo registado ainda.',
-          style: const TextStyle(fontSize: 13, color: Colors.grey),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE9EFE9),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                tipo == 'coleção'
+                    ? Icons.collections_bookmark_outlined
+                    : Icons.category_outlined,
+                size: 28,
+                color: const Color(0xFF48634F),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Sua biblioteca está à espera',
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Nenhum livro com $tipo registrado ainda.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: const Color(0xFF7C857B)),
+            ),
+          ],
         ),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       itemCount: chaves.length,
       itemBuilder: (context, index) {
         final nome = chaves[index];
         final livros = mapa[nome]!;
 
         return Card(
-          margin: const EdgeInsets.only(bottom: 6),
-          elevation: 1.5,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          margin: const EdgeInsets.only(bottom: 10),
           child: ExpansionTile(
-            dense: true,
-            tilePadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+            tilePadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 4,
+            ),
             leading: CircleAvatar(
-              radius: 14,
+              radius: 18,
+              backgroundColor: const Color(0xFFE9EFE9),
               child: Icon(
                 tipo == 'coleção' ? Icons.collections_bookmark : Icons.category,
-                size: 16,
+                size: 18,
+                color: const Color(0xFF48634F),
               ),
             ),
             title: Text(
               nome,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Color(0xFF263129),
+              ),
             ),
             subtitle: Text(
               '${livros.length} livro(s)',
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              style: const TextStyle(fontSize: 12, color: Color(0xFF7C857B)),
             ),
             children: livros.map((livro) {
               return ListTile(
-                dense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 6,
+                ),
                 leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
+                  borderRadius: BorderRadius.circular(6),
                   child: livro.urlCapa.isNotEmpty
                       ? Image.network(
                           livro.urlCapa,
-                          width: 32,
-                          height: 48,
+                          width: 40,
+                          height: 58,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
-                            width: 32,
-                            height: 48,
-                            color: Colors.grey[200],
-                            child: const Icon(Icons.book, size: 16),
+                            width: 40,
+                            height: 58,
+                            color: const Color(0xFFF0F2EF),
+                            child: const Icon(
+                              Icons.auto_stories_outlined,
+                              size: 18,
+                            ),
                           ),
                         )
                       : Container(
-                          width: 32,
-                          height: 48,
-                          color: Colors.grey[200],
-                          child: const Icon(Icons.book, size: 16),
+                          width: 40,
+                          height: 58,
+                          color: const Color(0xFFF0F2EF),
+                          child: const Icon(
+                            Icons.auto_stories_outlined,
+                            size: 18,
+                          ),
                         ),
                 ),
                 title: Text(
                   livro.titulo,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF263129),
+                  ),
                 ),
                 subtitle: Text(
                   '${livro.autor} • ${livro.nota.toStringAsFixed(1)} ★',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 11),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF7C857B),
+                  ),
                 ),
-                trailing: const Icon(Icons.chevron_right, size: 18),
+                trailing: const Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: Color(0xFF9BA49A),
+                ),
                 onTap: () async {
                   await Navigator.push(
                     context,
@@ -162,23 +216,56 @@ class _ListaColecoesState extends State<ListaColecoes> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: const Text('Biblioteca', style: TextStyle(fontSize: 18)),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Coleções / Séries'),
+          title: const Text('Biblioteca'),
+          bottom: TabBar(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              color: const Color(0xFFE9EFE9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            tabs: const [
+              Tab(text: 'Coleções / séries'),
               Tab(text: 'Gêneros'),
             ],
           ),
         ),
-        body: _carregando
-            ? const Center(child: CircularProgressIndicator())
-            : TabBarView(
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _construirListaAgrupada(_colecoes, 'coleção'),
-                  _construirListaAgrupada(_generos, 'gênero'),
+                  Text(
+                    'Explore sua biblioteca',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: const Color(0xFF263129),
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.6,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Histórias reunidas por gênero e coleção.',
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(color: const Color(0xFF7C857B)),
+                  ),
                 ],
               ),
+            ),
+            Expanded(
+              child: _carregando
+                  ? const Center(child: CircularProgressIndicator())
+                  : TabBarView(
+                      children: [
+                        _construirListaAgrupada(_colecoes, 'coleção'),
+                        _construirListaAgrupada(_generos, 'gênero'),
+                      ],
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
